@@ -1,7 +1,47 @@
 <template>
   <main class="main-content">
     <q-page-container class="container">
+      <div class="filter-section">
+        <SearchInput :classInput="'mobile'"/>
+        <div class="filters-item">
+          <div class="page-title">Рейтинг</div>
+          <div class="btn-container">
+            <div class="filter-btn red" @click="filterRate(1)">
+              <q-icon name="img:img/icons/arrow_down.svg" class="desktop"></q-icon>
+              <q-icon name="img:img/icons/down.svg" class="mobile"></q-icon>
+              <span>Низкий</span>
+              <span class="count">0</span>
+            </div>
+            <div class="filter-btn yellow" @click="filterRate(2)">
+              <q-icon name="img:img/icons/range_arrow.svg" class="desktop"></q-icon>
+              <q-icon name="img:img/icons/range.svg" class="mobile"></q-icon>
+              <span>Средний</span>
+              <span class="count">0</span>
+            </div>
+            <div class="filter-btn green" @click="filterRate(3)">
+              <q-icon name="img:img/icons/arrow_up.svg" class="desktop"></q-icon>
+              <q-icon name="img:img/icons/up.svg" class="mobile"></q-icon>
+              <span>Высокий</span>
+              <span class="count">0</span>
+            </div>
+          </div>
+        </div>
+        <div class="filters-item">
+          <div class="page-title">Статусы</div>
+          <q-select
+              filled
+              v-model="selectStatus"
+              :options="statusFilters"
+              @update:model-value="filter_orders"
+          >
+            <template v-slot:default>
+              <div class="count">{{ statusesCounts[selectStatus.alias] }}</div>
+            </template>
+          </q-select>
+        </div>
+      </div>
       <div class="info-order order-table">
+        <div class="page-title">Заказы</div>
         <q-table
             :columns="columns"
             :rows="results"
@@ -10,12 +50,12 @@
             :pagination="initialPagination"
             virtual-scroll
             @virtual-scroll="onScroll"
-            style="height: 60vh; min-height: 275px"
+            style="height: 480px"
         >
           <template v-slot:body="props">
             <q-tr :props="props">
               <q-td @click="selectOrder(props.row.id)" key="id" :props="props">{{ props.row.id }}</q-td>
-              <q-td key="from_to" :props="props">{{ props.row.from_to }}</q-td>
+              <q-td @click="selectOrder(props.row.id)" key="from_to" :props="props">{{ props.row.from_to }}</q-td>
               <q-td key="rate" :props="props">{{ props.row.rate }}</q-td>
               <q-td key="auto" :props="props">{{ props.row.auto }}</q-td>
               <q-td key="operator" :props="props">{{ props.row.operator }}</q-td>
@@ -31,19 +71,22 @@
 </template>
 
 <script>
+import SearchInput from "@/components/ui/SearchInput";
 import axios from "axios";
 
 export default {
   name: 'HomeView',
-  components: {},
+  components: {
+    SearchInput
+  },
   data() {
     return {
       statusesCounts: [],
       data_settings: {},
       selectStatus: {
-        label: 'Новые',
-        id: 1,
-        alias: 'new'
+        label: 'В работе',
+        id: 10,
+        alias: 'work'
       },
       statusFilters: [{
         label: 'Новые',
@@ -116,6 +159,7 @@ export default {
       },
       rate_count: [],
       loading: false,
+
     }
   },
   beforeMount() {
@@ -130,7 +174,7 @@ export default {
     searchNumber: function () {
       const searchNumber = this.$store.getters.ORDER_NUMBER
       if (searchNumber != 0) {
-        this.getOrders(`/api/orders/?search=${searchNumber}`)
+        this.getOrders(`/api/orders/?operator=${this.$store.getters.OPERATOR_ID}&&search=${searchNumber}`)
       } else {
         this.getOrders()
       }
@@ -142,37 +186,26 @@ export default {
       // this.getOrders(`/api/orders/?rate=${rate}`)
     },
     selectOrder(order) {
-      axios.post(`/api/orders/${order}/set_in_work/`).then(response => {
-        if (response.data.status == false) {
-          this.showNotify(response.data.message, 'positive')
-        } else {
-          this.$store.dispatch('addOpenTab', order)
-
-        }
-      })
+      this.$store.dispatch('addOpenTab', order)
     },
-    async getOrders(url = '/api/orders/', update = false) {
-      axios.get('/api/orders/get_free_orders/').then(r => {
-        console.log(r)
-      })
-      await axios.get('/api/rate/').then(response => {
-        this.rate = response.data
+    async getOrders(url = `/api/orders/?operator=${this.$store.getters.OPERATOR_ID}&&status=${this.selectStatus.id}`, update = false) {
+      await axios.get('/api/orders/get_count_rate/').then(response => {
+        this.rate_count = response.data
       })
       axios.get(url).then(response => {
-        console.log(response.data)
-        const tmp_result = response.data.results
+        const result = response.data.results
         this.statusesCounts = response.data.counts
         this.data_settings = response.data
         if (update) {
-          this.results = this.results.concat(tmp_result)
+          this.results = this.results.concat(result)
         } else {
-          this.results = tmp_result
+          this.results = result
         }
       })
 
     },
     filter_orders() {
-      this.getOrders(`/api/orders/?status=${this.selectStatus.id}`)
+      this.getOrders(`/api/orders/?operator=${this.$store.getters.OPERATOR_ID}&status=${this.selectStatus.id}`)
     },
     formatDate(date) {
       let now = new Date(date),
@@ -187,7 +220,6 @@ export default {
       const lastPage = Math.ceil(vm.data_settings.count / vm.data_settings.per_page)
       const nextPage = Math.ceil(vm.results.length / vm.data_settings.per_page)
       const lastIndex = vm.results.length - 1
-      console.log(vm.data_settings)
       if (nextPage < lastPage && to.index === lastIndex) {
         this.$nextTick(() => {
           setTimeout(function () {
@@ -195,17 +227,7 @@ export default {
           }, 500)
         })
       }
-    },
-    showNotify(message, color) {
-      this.$q.notify({
-        color: color,
-        textColor: 'white',
-        message: message,
-        position: 'top',
-        timeout: 3000,
-        icon: 'info'
-      })
-    },
+    }
   }
   ,
 }
@@ -217,6 +239,57 @@ $indent: 20px
 .main-content
   margin: 0 10px 0 20px
 
+.filter-section
+  display: grid
+  grid-template-columns: 1fr 40%
+  gap: 40px
+  margin-top: 30px
+
+  .filters-item
+    display: flex
+    flex-direction: column
+
+    .page-title
+      margin-bottom: $indent
+
+    .btn-container
+      display: flex
+
+      .filter-btn
+        display: flex
+        align-items: center
+        justify-content: space-between
+        margin: 0 10px
+        color: #fff
+        padding: 15px 20px
+        border-radius: 4px
+        flex: 1
+        font-size: 16px
+        cursor: pointer
+
+        .q-icon
+          width: 24px
+          height: 24px
+
+        .q-icon.mobile
+          display: none
+
+      .filter-btn:first-child
+        margin-left: 0
+
+      .filter-btn:last-of-type
+        margin-right: 0
+
+      .filter-btn.red
+        background: $main-red
+
+      .filter-btn.yellow
+        background: $main-yellow
+
+      .filter-btn.green
+        background: $main-green
+
+
   .count
     display: flex
     align-items: center
@@ -227,7 +300,7 @@ $indent: 20px
 
 
 .info-order
-  margin-top: 30px
+  margin-top: 40px
 
   .page-title
     margin-bottom: $indent
@@ -243,6 +316,25 @@ $indent: 20px
     grid-template-columns: repeat(1, 1fr)
 
 @media screen and (max-width: 768px)
+  .page-title
+    font-size: 20px
+
+  .filter-section
+  .filters-item
+    .btn-container
+      .filter-btn
+        padding: 0 !important
+
+        .q-icon.desktop
+          display: none !important
+
+        .q-icon.mobile
+          display: block !important
+
+      .filter-btn
+        background: transparent !important
+
+
   .info-order
     margin-top: 10px
 
@@ -255,9 +347,26 @@ $indent: 20px
 
   .filter-section
     .filters-item
+      flex-direction: row
+      justify-content: space-between
+      align-items: center
+
+      .page-title
+        margin-bottom: 0
+
+      .count
+        margin-left: 25px
+        margin-right: -5px
+
       .btn-container
+        align-items: center
+        flex-direction: row
+        justify-content: center
+        margin: 0
+
         .filter-btn
           justify-content: center
+          margin: 0
 
           .q-icon
             display: block
@@ -265,4 +374,26 @@ $indent: 20px
           span,
           .count
             display: none
+
+@media screen and (max-width: 445px)
+  .page-title
+    font-size: 20px
+
+@media screen and (max-width: 1000px)
+  .info-order
+    .q-table
+      tr
+        th:nth-of-type(3),
+        th:nth-of-type(4),
+        th:nth-of-type(5),
+        th:nth-of-type(6),
+        th:nth-of-type(7),
+        th:nth-of-type(8),
+        td:nth-of-type(3),
+        td:nth-of-type(4),
+        td:nth-of-type(5),
+        td:nth-of-type(6),
+        td:nth-of-type(7),
+        td:nth-of-type(8)
+          display: none
 </style>

@@ -1,0 +1,240 @@
+@import './quasar.variables.sass'
+@import '~quasar-styl'
+@import "mainStyle"
+
+.q-pa-md,
+.q-toolbar
+  padding: 0 30px 0 12px
+
+.q-header
+  .burger-btn
+    .q-icon
+      color: #000
+
+  .q-layout__shadow:after
+    box-shadow: none
+
+.search-container
+  width: 100%
+  max-width: 500px
+
+  .q-field__inner
+    width: 100%
+    border-radius: 4px
+    border: 1px solid rgba(0, 0, 0, 0.1)
+
+  .q-field--filled .q-field__control
+    background: $grey-bg
+
+.filter-section
+  .q-select
+    .q-field__inner
+      background: #000000
+      border: 1px solid rgba(0, 0, 0, 0.1)
+      border-radius: 4px
+
+  .q-field__native
+    span
+      color: #fff
+      font-size: 16px
+
+  .q-select
+    .material-icons
+      color: #fff
+
+.info-order
+  .q-table__card
+    box-shadow: none
+
+  .q-table__container.no-link
+    .q-table
+      tr
+        td
+          color: #000
+          text-decoration: none
+          cursor: auto
+
+  .q-table
+    padding: 20px
+    border-radius: 4px
+
+    tr
+      td
+        padding: 0
+        font-size: 16px
+        font-weight: 400
+
+      td:first-child
+        color: $main-color
+        text-decoration: underline
+        cursor: pointer
+
+      th
+        position: relative
+        border: none
+        font-size: 16px
+        font-weight: 500
+        color: rgba(0, 0, 0, 0.4)
+        padding: 0 0 5px
+
+      th:after
+        content: ''
+        height: 1px
+        background: rgba(0, 0, 0, 0.1)
+        width: 90%
+        position: absolute
+        bottom: 0
+        left: 0
+
+      th:last-child:after
+        content: ''
+        height: 1px
+        background: rgba(0, 0, 0, 0.1)
+        width: 100%
+        position: absolute
+        bottom: 0
+        left: 0
+
+.info-order-container
+  .q-field--filled .q-field__control
+    background: linear-gradient(0deg, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.05)), #FFFFFF
+    border: 1px solid rgba(0, 0, 0, 0.1)
+    border-radius: 4px
+
+  .q-field__label
+    color: #000 !important
+    font-size: 16px
+
+  .call-client
+    background: $main-color
+
+    .block
+      font-size: 16px
+      font-weight: 500
+
+  .q-field--filled.q-field--readonly .q-field__control:before
+    border-bottom: none
+
+@media screen and (max-width: 1000px)
+  .info-order.order-table
+    .q-table
+      tr
+        th:nth-of-type(3),
+        th:nth-of-type(4),
+        th:nth-of-type(5),
+        th:nth-of-type(6),
+        th:nth-of-type(7),
+        th:nth-of-type(8),
+        td:nth-of-type(3),
+        td:nth-of-type(4),
+        td:nth-of-type(5),
+        td:nth-of-type(6),
+        td:nth-of-type(7),
+        td:nth-of-type(8)
+          display: none
+
+  .info-order.drivers-table
+    .q-table
+      tr
+        th:nth-of-type(4),
+        th:nth-of-type(5),
+        th:nth-of-type(6),
+        th:nth-of-type(7),
+        th:nth-of-type(8),
+        td:nth-of-type(4),
+        td:nth-of-type(5),
+        td:nth-of-type(6),
+        td:nth-of-type(7),
+        td:nth-of-type(8)
+          display: none
+
+  .info-order.docks-table
+    .q-table
+      tr
+        th:nth-of-type(2),
+        th:nth-of-type(4),
+        td:nth-of-type(2),
+        td:nth-of-type(4)
+          display: none
+
+        th:nth-of-type(5),
+        td:nth-of-type(5)
+          text-align: center
+  .info-order.parking-table
+    .q-table
+      tr
+        th:nth-of-type(1),
+        th:nth-of-type(3),
+        th:nth-of-type(4),
+        td:nth-of-type(1),
+        td:nth-of-type(3),
+        td:nth-of-type(4)
+          display: none
+
+        td:nth-of-type(5)
+          max-width: 50px
+          white-space: normal
+
+  .info-order.rate-table
+    .q-table
+      tr
+        th:nth-of-type(1),
+        th:nth-of-type(3),
+        td:nth-of-type(1),
+        td:nth-of-type(3)
+          display: none
+
+  .info-order.cost-table
+    .q-table
+      tr
+        th:nth-of-type(1),
+        td:nth-of-type(1)
+          display: none
+
+@media screen and (max-width: 768px)
+  .filter-section
+    gap: 20px !important
+
+    .filters-item
+      .q-field__control
+        height: 39px
+        min-height: auto
+
+      .q-field--auto-height .q-field__native
+        min-height: auto
+
+      .q-field__marginal
+        height: 39px
+
+  .q-pa-md,
+  .q-toolbar
+    padding: 0 30px
+
+  .info-order
+    .q-table__card
+      box-shadow: none
+
+    .q-table
+      border: 1px solid rgba(0, 0, 0, 0.05)
+      padding: 20px
+      border-radius: 4px
+
+      tr
+        td
+          padding: 0 2px
+          font-size: 12px
+          font-weight: 400
+
+        td:first-child
+          color: $main-color
+          text-decoration: underline
+          cursor: pointer
+
+        th
+          position: relative
+          border: none
+          font-size: 12px
+          font-weight: 500
+          color: rgba(0, 0, 0, 0.4)
+          padding: 0 0 5px
+
